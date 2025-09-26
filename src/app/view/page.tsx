@@ -108,7 +108,6 @@ export default function ViewItems() {
         `
       }}
     >
-      {/* Subtle floating particles for aesthetic depth */}
       <motion.div 
         className="absolute inset-0"
         initial={{ opacity: 0 }}
@@ -138,14 +137,14 @@ export default function ViewItems() {
       </motion.div>
 
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-gray-200/50 relative z-10">
+      <header className="bg-white/0 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <CubeIcon className="w-8 h-8 text-purple-600" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Inventory System</h1>
-                <p className="text-sm text-gray-500">Manage your inventory items with style and efficiency</p>
+                <p className="text-sm text-black-900">Manage your inventory items with style and efficiency</p>
               </div>
             </div>
             <motion.button

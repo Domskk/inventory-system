@@ -37,7 +37,7 @@ export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFo
       setError(supabaseError.message)
     } else {
       onClose?.()
-      window.location.reload()  // Refresh to update list/stats
+    //   window.location.reload()  // Refresh to update list/stats
     }
   }
 
