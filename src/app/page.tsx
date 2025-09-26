@@ -1,103 +1,124 @@
-import Image from "next/image";
+'use client'
+import Link from 'next/link'
+import { CubeIcon } from '@heroicons/react/24/outline'
+import { motion, type Variants } from 'framer-motion'
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1
+    }
+  }
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' }
+  }
+}
+
+const iconVariants: Variants = {
+  hidden: { scale: 0, rotate: -180 },
+  visible: { 
+    scale: 1, 
+    rotate: 0
+  }
+}
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{
+        background: `
+          radial-gradient(circle at center, rgba(147, 51, 234, 0.2) 0%, 
+                          rgba(139, 92, 246, 0.1) 50%, 
+                          transparent 100%),
+          linear-gradient(to bottom, #4c1d95 0%, #581c87 100%)
+        `
+      }}
+    >
+      <motion.div 
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        <motion.div 
+          className="absolute top-20 left-10 w-4 h-4 bg-purple-300 rounded-full"
+          animate={{ y: [0, -30, 0], opacity: [0.8, 1, 0.8] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+        <motion.div 
+          className="absolute top-40 right-20 w-3 h-3 bg-purple-200 rounded-full"
+          animate={{ y: [0, 20, 0], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        />
+        <motion.div 
+          className="absolute bottom-40 left-1/3 w-5 h-5 bg-purple-400 rounded-full"
+          animate={{ y: [0, -15, 0], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-1/4 w-2 h-2 bg-purple-500 rounded-full"
+          animate={{ y: [0, 10, 0], opacity: [0.5, 0.9, 0.5] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+        />
+      </motion.div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative z-10 text-center w-full max-w-md px-4"
+      >
+        <motion.div 
+          variants={iconVariants}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
+          <CubeIcon className="w-16 h-16 text-purple-200 mx-auto mb-4 drop-shadow-lg" />
+        </motion.div>
+        
+        <motion.h1 
+          variants={itemVariants}
+          className="text-3xl font-bold text-white mb-2"
+        >
+          Simple Inventory System
+        </motion.h1>
+        
+        <motion.p 
+          variants={itemVariants}
+          className="text-lg text-purple-100 mb-6"
+        >
+          Track stock, manage orders, and stay organized effortlessly.
+        </motion.p>
+        
+        <motion.div 
+          variants={itemVariants}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Link
+            href="/view"
+            className="relative overflow-hidden inline-block w-full md:w-auto bg-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl group"
+            aria-label="Navigate to inventory dashboard"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <span className="relative z-10">Go to Inventory</span>
+            <motion.div 
+              className="absolute inset-0 bg-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              initial={{ scaleX: 0 }}
+              whileHover={{ scaleX: 1 }}
+              style={{ originX: 0 }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          </Link>
+        </motion.div>
+      </motion.div>
     </div>
-  );
+  )
 }
