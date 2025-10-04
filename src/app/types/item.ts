@@ -3,7 +3,9 @@ export interface Item {
   name: string
   description?: string
   quantity: number
-  inserted_at: string
+  price? : number
+  image_url?: string
+  inserted_at: string // updated timestamp on eah update
 }
 
 export interface Stats {
@@ -11,4 +13,10 @@ export interface Stats {
     totalQuantity: number
     lowStock: number
     outOfStock: number
+    totalValue: number
+}
+
+export interface Profile {
+  id: string
+  role: 'user' | 'admin'
 }

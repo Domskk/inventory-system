@@ -1,6 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+// src/lib/supabase.ts
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/supabase'
 
+// Use env vars from `.env.local`
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+let supabaseClient: SupabaseClient<Database> | null = null
+
+// Singleton factory function with typing applied
+export const createClient = (): SupabaseClient<Database> => {
+  if (!supabaseClient) {
+    supabaseClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey)
+  }
+  return supabaseClient
+}

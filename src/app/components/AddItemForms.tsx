@@ -2,42 +2,120 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { supabase } from '../lib/supabase'
-import { Item } from '../types/item'
+import { createClient } from '../lib/supabase'
+import Image from 'next/image'
+import type { TablesInsert, TablesUpdate } from '@/types/supabase'
+import { Item } from '../types/item' // Import Item type for consistency
+
+// Define reusable types for this table
+type ItemUpdate = TablesUpdate<'items'>
+type ItemInsert = TablesInsert<'items'>
 
 interface AddItemFormProps {
   item?: Item | null
-  onClose?: () => void
+  onClose?: (updatedItem?: Item) => void
   isEdit?: boolean
 }
 
-export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFormProps) {
-  const [name, setName] = useState(item?.name || '')
-  const [description, setDescription] = useState(item?.description || '')
-  const [quantity, setQuantity] = useState(item?.quantity || 0)
+export default function AddItemForm({
+  item,
+  onClose,
+  isEdit = false,
+}: AddItemFormProps) {
+  const [name, setName] = useState(item?.name ?? '')
+  const [description, setDescription] = useState(item?.description ?? '')
+  const [quantity, setQuantity] = useState(item?.quantity ?? 0)
+  const [price, setPrice] = useState(item?.price ?? 0)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  const supabase = createClient() // already typed with Database
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || quantity < 0) {
-      setError('Please fill in name and a valid quantity.')
+    if (!name || quantity < 0 || price < 0) {
+      setError('Please fill in a name and valid quantity/price.')
       return
     }
+
     setSubmitting(true)
     setError('')
+    let imageUrl = item?.image_url ?? null
 
-    const { error: supabaseError } = await supabase
-      .from('items')
-      .upsert({ id: item?.id || undefined, name, description: description || null, quantity })
-      .select()
+    if (imageFile) {
+      const fileExt = imageFile.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+      const { data, error: uploadError } = await supabase.storage
+        .from('item-images')
+        .upload(fileName, imageFile, { upsert: true })
+
+      if (uploadError || !data) {
+        setError('Failed to upload image: ' + (uploadError?.message ?? 'unknown'))
+        setSubmitting(false)
+        return
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('items-images')
+        .getPublicUrl(data.path)
+
+      imageUrl = publicUrl ?? null
+    }
+
+    // Strictly typed update/insert data
+    const updateData: ItemUpdate = {
+      name,
+      description: description || null,
+      quantity,
+      price,
+      image_url: imageUrl,
+    }
+
+    let supabaseError: { message?: string } | null = null
+    let updatedItem: Item | null = null
+
+    try {
+      if (isEdit && item?.id) {
+        // Update existing - fetch full row after update
+        const { data, error } = await supabase
+          .from('items')
+          .update(updateData)
+          .eq('id', item.id)
+          .select('*')
+          .single()
+
+        supabaseError = error
+        if (data) {
+          updatedItem = data as Item
+        }
+      } else {
+        // Insert new - fetch full row after insert
+        const { data, error } = await supabase
+          .from('items')
+          .insert([updateData as ItemInsert])
+          .select('*')
+          .single()
+
+        supabaseError = error
+        if (data) {
+          updatedItem = data as Item
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update/insert item:', error)
+      supabaseError = { message: 'An unexpected error occurred' }
+    }
 
     setSubmitting(false)
-    if (supabaseError) {
-      setError(supabaseError.message)
+
+    if (supabaseError || !updatedItem) {
+      const errorMsg = supabaseError?.message ?? 'An error occurred'
+      setError(errorMsg)
     } else {
-      onClose?.()
-    //   window.location.reload()  // Refresh to update list/stats
+      // Success: Pass the full updated/inserted item back to parent
+      onClose?.(updatedItem)
+      setError('')
     }
   }
 
@@ -60,24 +138,24 @@ export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFo
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.95, y: 20, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          onClick={(e) => e.stopPropagation()}  // Prevent closing on modal click
+          onClick={(e) => e.stopPropagation()}
           className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-white/30"
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {isEdit ? 'Edit Item' : 'Add New Item'}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">{isEdit ? 'Edit Item' : 'Add New Item'}</h2>
               <button onClick={handleClose} className="p-1 hover:bg-gray-200 rounded-full transition-colors">
                 <XMarkIcon className="w-5 h-5 text-gray-600" />
               </button>
             </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-700">{error}</p>
                 </div>
               )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                 <input
@@ -90,6 +168,7 @@ export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFo
                   placeholder="Enter item name"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
@@ -101,6 +180,7 @@ export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFo
                   rows={3}
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
                 <input
@@ -114,6 +194,48 @@ export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFo
                   placeholder="0"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (₱) *</label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                  min={0}
+                  step="0.01"
+                  required
+                  disabled={submitting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-100 text-gray-900"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  disabled={submitting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                {item?.image_url && (
+                  <div className="mt-2">
+                    {/* Note: If the public URL is external (supabase storage), ensure it's added to next.config.js images.domains */}
+                    <Image
+                      src={item.image_url}
+                      alt="Current"
+                      width={400}
+                      height={200}
+                      className="w-full h-24 object-cover rounded"
+                      onError={(e) => {
+                        ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex space-x-3 pt-4">
                 <button
                   type="button"
@@ -123,6 +245,7 @@ export default function AddItemForm({ item, onClose, isEdit = false }: AddItemFo
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={submitting}
