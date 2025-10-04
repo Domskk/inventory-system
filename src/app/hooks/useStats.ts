@@ -1,4 +1,3 @@
-// New: src/hooks/useStats.ts
 import { useMemo } from 'react'
 import { Item, Stats } from '../types/item'
 

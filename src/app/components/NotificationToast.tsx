@@ -1,4 +1,3 @@
-// New: src/components/NotificationToast.tsx
 'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircleIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'

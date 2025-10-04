@@ -1,4 +1,3 @@
-// New: src/hooks/useInlineEdit.ts
 'use client'
 import { useState } from 'react'
 import { createClient } from '../lib/supabase'

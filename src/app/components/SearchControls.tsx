@@ -1,4 +1,3 @@
-// New: src/components/SearchControls.tsx
 import { MagnifyingGlassIcon, Bars3Icon, Squares2X2Icon, FunnelIcon } from '@heroicons/react/24/outline'
 import { motion } from 'framer-motion'
 

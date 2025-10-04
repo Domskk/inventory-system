@@ -1,4 +1,3 @@
-// Updated: src/components/ItemsGrid.tsx
 import { motion, AnimatePresence } from 'framer-motion'
 import ItemCard from './ItemCard'
 import { Item } from '../types/item'

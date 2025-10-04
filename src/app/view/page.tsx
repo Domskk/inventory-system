@@ -1,4 +1,3 @@
-// Updated: src/app/view/page.tsx (Integrate DeleteItemModal)
 'use client'
 import { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'

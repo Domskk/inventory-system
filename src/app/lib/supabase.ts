@@ -1,4 +1,3 @@
-// src/app/lib/supabase.ts
 import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 
@@ -8,7 +7,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 let supabaseClient: SupabaseClient<Database> | null = null
 
-// Singleton factory function with typing applied
 export const createClient = (): SupabaseClient<Database> => {
   if (!supabaseClient) {
     supabaseClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey)

@@ -1,4 +1,3 @@
-// New: src/hooks/useItems.ts
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '../lib/supabase'

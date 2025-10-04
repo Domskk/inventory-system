@@ -1,4 +1,3 @@
-// New: src/components/FiltersPanel.tsx
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface FiltersPanelProps {

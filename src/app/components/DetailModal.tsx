@@ -1,4 +1,3 @@
-// Updated: src/components/DetailModal.tsx (Update onDelete to pass Item)
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { XMarkIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'

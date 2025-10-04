@@ -1,4 +1,3 @@
-// Updated: src/components/ItemsList.tsx
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'

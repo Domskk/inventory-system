@@ -1,4 +1,3 @@
-// New: src/components/DeleteItemModal.tsx
 'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { XMarkIcon, TrashIcon } from '@heroicons/react/24/outline'

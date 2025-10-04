@@ -1,4 +1,3 @@
-// Updated: src/app/page.tsx (Integrate useAuth hook, useRouter for redirect, remove manual auth listeners)
 'use client'
 import { createClient } from './lib/supabase'
 import { CubeIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'

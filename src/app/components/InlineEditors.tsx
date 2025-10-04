@@ -1,4 +1,3 @@
-// Updated: src/components/InlineEditors.tsx
 import { Item } from '../types/item'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 

@@ -1,6 +1,3 @@
-// src/app/components/AddItemForms.tsx
-// (Minor refactors: Extract handleImageUpload logic, improve error handling, use useCallback for handlers.
-// Fixed getSubmitText to return proper loading text.)
 'use client'
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'

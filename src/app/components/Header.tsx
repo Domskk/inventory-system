@@ -1,4 +1,3 @@
-// New: src/components/Header.tsx
 import { CubeIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import { motion } from 'framer-motion'
 import { Profile } from '../types/item'
