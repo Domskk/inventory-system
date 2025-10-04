@@ -1,4 +1,4 @@
-// src/lib/supabase.ts
+// src/app/lib/supabase.ts
 import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 
