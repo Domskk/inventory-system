@@ -5,7 +5,7 @@ import { CubeIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/o
 import { motion, type Variants, AnimatePresence } from 'framer-motion'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from './hooks/useAuth' // Add this import
+import { useAuth } from './hooks/useAuth' 
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },

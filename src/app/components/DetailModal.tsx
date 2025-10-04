@@ -1,20 +1,31 @@
-// New: src/components/DetailModal.tsx
+// Updated: src/components/DetailModal.tsx (Update onDelete to pass Item)
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { XMarkIcon, PencilIcon, TrashIcon, CubeIcon} from '@heroicons/react/24/outline'
+import { XMarkIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 import { Item } from '../types/item'
 
+interface Status {
+  label: string
+  color: string
+}
+
 interface DetailModalProps {
+  show: boolean
   item: Item | null
   onClose: () => void
   onEdit: (item: Item) => void
-  onDelete: (id: string) => void
+  onDelete: (item: Item) => void
   isAdmin: boolean
-  show: boolean
 }
 
-export default function DetailModal({ item, onClose, onEdit, onDelete, isAdmin, show }: DetailModalProps) {
+function getStatus(quantity: number): Status {
+  if (quantity === 0) return { label: 'Out of Stock', color: 'bg-red-100 text-red-800 border-red-200' }
+  if (quantity < 10) return { label: 'Low Stock', color: 'bg-orange-100 text-orange-800 border-orange-200' }
+  return { label: 'In Stock', color: 'bg-green-100 text-green-800 border-green-200' }
+}
+
+export default function DetailModal({ show, item, onClose, onEdit, onDelete, isAdmin }: DetailModalProps) {
   if (!item) return null
 
   const status = getStatus(item.quantity)
@@ -44,76 +55,49 @@ export default function DetailModal({ item, onClose, onEdit, onDelete, isAdmin, 
               <XMarkIcon className="w-5 h-5 text-gray-600" />
             </button>
 
-            <div className="relative w-full h-64 rounded-t-2xl overflow-hidden bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-              {item.image_url ? (
-                <Image
-                  src={item.image_url}
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-              ) : (
-                <CubeIcon className="w-24 h-24 text-purple-400 opacity-50" />
+            <div className="p-6">
+              {item.image_url && (
+                <div className="relative w-full h-64 rounded-xl overflow-hidden mb-6">
+                  <Image
+                    src={item.image_url}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                </div>
               )}
-            </div>
-
-            <div className="p-6 space-y-6">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{item.name}</h2>
-                {item.description && (
-                  <p className="text-gray-600 text-lg">{item.description}</p>
-                )}
-              </div>
-
-              <div className="text-center">
-                <span className={`inline-flex px-4 py-2 rounded-full text-sm font-medium border ${status.color}`}>
-                  {status.label}
-                </span>
-              </div>
-
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{item.name}</h2>
+              {item.description && <p className="text-gray-600 mb-6">{item.description}</p>}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-500 mb-1">Quantity</p>
-                  <p className="font-semibold text-gray-900">{item.quantity}</p>
+                <div>
+                  <p className="text-gray-500">Quantity: <span className="font-semibold text-gray-900">{item.quantity}</span></p>
+                  {item.price !== undefined && (
+                    <p className="text-gray-500">Price: <span className="font-semibold text-gray-900">₱{(item.price ?? 0).toFixed(2)}</span></p>
+                  )}
+                  <p className="text-gray-500">Total Value: <span className="font-semibold text-gray-900">₱{(item.quantity * (item.price || 0)).toFixed(2)}</span></p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-500 mb-1">Price</p>
-                  <p className="font-semibold text-gray-900">₱{(item.price ?? 0).toFixed(2)}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-500 mb-1">Total Value</p>
-                  <p className="font-semibold text-gray-900">₱{(item.quantity * (item.price || 0)).toFixed(2)}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-500 mb-1">Date Added</p>
-                  <p className="text-gray-900">{formatDate(item.inserted_at)}</p>
+                <div>
+                  <p className="text-gray-500">Status: <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${status.color}`}>{status.label}</span></p>
+                  <p className="text-gray-500">Added: <span className="text-gray-600">{formatDate(item.inserted_at)}</span></p>
                 </div>
               </div>
-
               {isAdmin && (
-                <div className="flex justify-end space-x-3 pt-4 border-t">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                  <button
                     onClick={() => onEdit(item)}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                   >
                     <PencilIcon className="w-4 h-4 inline mr-2" />
                     Edit
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => onDelete(item.id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors"
+                  </button>
+                  <button
+                    onClick={() => onDelete(item)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <TrashIcon className="w-4 h-4 inline mr-2" />
                     Delete
-                  </motion.button>
-                </div>
-              )}
-              {!isAdmin && (
-                <div className="text-center text-gray-500 py-4 border-t">
-                  View only
+                  </button>
                 </div>
               )}
             </div>
@@ -122,10 +106,4 @@ export default function DetailModal({ item, onClose, onEdit, onDelete, isAdmin, 
       )}
     </AnimatePresence>
   )
-}
-
-function getStatus(quantity: number) {
-  if (quantity === 0) return { label: 'Out of Stock', color: 'bg-red-100 text-red-800 border-red-200' }
-  if (quantity < 10) return { label: 'Low Stock', color: 'bg-orange-100 text-orange-800 border-orange-200' }
-  return { label: 'In Stock', color: 'bg-green-100 text-green-800 border-green-200' }
 }

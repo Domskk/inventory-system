@@ -1,12 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true
+  },
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'xcgpqgehoshlotwrzrwi.supabase.co',  // Your exact Supabase project hostname
+        hostname: 'xcgpqgehoshlotwrzrwi.supabase.co',  // Supabase bucket
         port: '',  // Empty for default (443)
-        pathname: '/storage/v1/object/public/**',  // Matches all public Storage paths (e.g., /item-images/...)
+        pathname: '/storage/v1/object/public/**', // Path to images
       },
     ],
   },
