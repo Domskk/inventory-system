@@ -5,9 +5,8 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { createClient } from '../lib/supabase'
 import Image from 'next/image'
 import type { TablesInsert, TablesUpdate } from '@/types/supabase'
-import { Item } from '../types/item' // Import Item type for consistency
+import { Item } from '../types/item' 
 
-// Define reusable types for this table
 type ItemUpdate = TablesUpdate<'items'>
 type ItemInsert = TablesInsert<'items'>
 
@@ -30,7 +29,7 @@ export default function AddItemForm({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const supabase = createClient() // already typed with Database
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,11 +43,37 @@ export default function AddItemForm({
     let imageUrl = item?.image_url ?? null
 
     if (imageFile) {
+      // Delete old image if editing and old image exists
+      if (isEdit && item?.image_url) {
+        try {
+          const url = new URL(item.image_url)
+          const pathname = url.pathname
+          const publicIndex = pathname.indexOf('/public/')
+          if (publicIndex !== -1) {
+            const pathAfterPublic = pathname.substring(publicIndex + 8) // '/public/'
+            const parts = pathAfterPublic.split('/')
+            if (parts.length > 1) { // bucket + path
+              const oldPath = parts.slice(1).join('/')
+              const { error: deleteError } = await supabase.storage
+                .from('item-images')
+                .remove([oldPath])
+              if (deleteError) {
+                console.warn('Failed to delete old image:', deleteError)
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to parse old image URL for deletion:', err)
+        }
+      }
+
       const fileExt = imageFile.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
+      const filePath = `images/${fileName}`  // path for storage
+      
       const { data, error: uploadError } = await supabase.storage
         .from('item-images')
-        .upload(fileName, imageFile, { upsert: true })
+        .upload(filePath, imageFile, { upsert: true })
 
       if (uploadError || !data) {
         setError('Failed to upload image: ' + (uploadError?.message ?? 'unknown'))
@@ -57,13 +82,12 @@ export default function AddItemForm({
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('items-images')
-        .getPublicUrl(data.path)
+        .from('item-images')
+        .getPublicUrl(filePath)
 
       imageUrl = publicUrl ?? null
     }
 
-    // Strictly typed update/insert data
     const updateData: ItemUpdate = {
       name,
       description: description || null,
@@ -90,7 +114,6 @@ export default function AddItemForm({
           updatedItem = data as Item
         }
       } else {
-        // Insert new - fetch full row after insert
         const { data, error } = await supabase
           .from('items')
           .insert([updateData as ItemInsert])
@@ -113,7 +136,6 @@ export default function AddItemForm({
       const errorMsg = supabaseError?.message ?? 'An error occurred'
       setError(errorMsg)
     } else {
-      // Success: Pass the full updated/inserted item back to parent
       onClose?.(updatedItem)
       setError('')
     }
@@ -122,6 +144,15 @@ export default function AddItemForm({
   const handleClose = () => {
     setError('')
     onClose?.()
+  }
+
+  const getSubmitText = () => {
+    if (!submitting) {
+      return isEdit ? 'Update Item' : 'Add Item'
+    }
+   
+    const note = isEdit? 'updated' : 'added'
+    return `Saving...${note}`
   }
 
   return (
@@ -219,7 +250,7 @@ export default function AddItemForm({
                   disabled={submitting}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
-                {item?.image_url && (
+                {item?.image_url && !imageFile && (
                   <div className="mt-2">
                     {/* Note: If the public URL is external (supabase storage), ensure it's added to next.config.js images.domains */}
                     <Image
@@ -254,7 +285,7 @@ export default function AddItemForm({
                   {submitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Saving...</span>
+                      <span>{getSubmitText()}</span>
                     </>
                   ) : (
                     <span>{isEdit ? 'Update Item' : 'Add Item'}</span>
