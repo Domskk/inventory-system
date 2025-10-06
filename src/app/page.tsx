@@ -200,14 +200,14 @@ function LoadingModal({ isVisible }: { isVisible: boolean }) {
       {isVisible && (
         <>
           <motion.div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
             variants={backdropVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
           />
           <motion.div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center"
+            className="fixed top-1/2 left-1/1 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center"
             variants={modalVariants}
             initial="hidden"
             animate="visible"

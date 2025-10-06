@@ -1,7 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
@@ -13,6 +14,22 @@ const nextConfig = {
       },
     ],
   },
-}
+  webpack: (config, { isServer }) => {
+    // Stub Node.js modules for client bundles only (fixes 'fs' leak from Tailwind/fast-glob)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+        stream: false,
+        buffer: false,
+        os: false,
+        util: false,
+      };
+    }
+    return config;
+  },
+};
 
-module.exports = nextConfig
+export default nextConfig;
