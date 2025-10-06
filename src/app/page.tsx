@@ -243,7 +243,7 @@ function ErrorModal({
           onClick={onClose}  // Click backdrop to close
         />
         <motion.div
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-900/90 border border-red-500 rounded-lg p-6 shadow-2xl z-50 max-w-md w-full mx-4 text-center"
+          className="fixed top-1/2 left-1/1 transform -translate-x-1/2 -translate-y-1/2 bg-red-900/90 border border-red-500 rounded-lg p-6 shadow-2xl z-50 max-w-md w-full mx-4 text-center"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
