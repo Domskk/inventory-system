@@ -19,16 +19,44 @@ import Header from '../components/Header'
 import LogoutModal from '../components/LogoutModal'
 import DeleteItemModal from '../components/DeleteItemModal'
 import { format } from 'date-fns'
+import { useRouter } from 'next/navigation'
+
+function LoadingModal({ isVisible, noBackdrop = false, text = 'Loading...' }: { isVisible: boolean; noBackdrop?: boolean; text?: string; }) {
+  return (
+    <>
+      {isVisible && (
+        <>
+          {!noBackdrop && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" /> }
+          <motion.div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+          >
+            <div className="flex flex-col items-center space-y-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <p className="text-white text-lg">{text}</p>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </>
+  )
+}
 
 export default function ViewItems() {
   const { user, profile, isAdmin, loading: authLoading, signOut } = useAuth()
   const { items, loading: itemsLoading, deleteItem } = useItems()
   const stats = useStats(items)
   const [itemsState, setItems] = useState<Item[]>(items)
+  const router = useRouter()
 
-  // Sync items from hook to local state
+  // Sync items from hook to local state and fetch new items
   useEffect(() => {
-    setItems(items)
+    const sortedItems = [...items].sort((a, b) => new Date(b.inserted_at).getTime()
+  - new Date(a.inserted_at).getTime()
+    )
+    setItems(sortedItems)
   }, [items])
 
   const {
@@ -43,10 +71,9 @@ export default function ViewItems() {
   } = useInlineEdit(itemsState, setItems, isAdmin)
 
   const [search, setSearch] = useState('')
+  const [filterInStock, setFilterInStock] = useState(false)
   const [filterLowStock, setFilterLowStock] = useState(false)
-  const [filterStatus, setFilterStatus] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
+  const [filterOutOfStock, setFilterOutOfStock] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
@@ -59,10 +86,32 @@ export default function ViewItems() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [notification, setNotification] = useState<{ show: boolean; type: 'success' | 'error'; message: string }>({ show: false, type: 'success', message: '' })
 
-  const loading = authLoading || itemsLoading
-
   const showNotification = useCallback((type: 'success' | 'error', message: string) => {
     setNotification({ show: true, type, message })
+  }, [])
+
+  const handleFilterInStockChange = useCallback((checked: boolean) => {
+    setFilterInStock(checked)
+    if (checked) {
+      setFilterLowStock(false)
+      setFilterOutOfStock(false)
+    }
+  }, [])
+
+  const handleFilterLowStockChange = useCallback((checked: boolean) => {
+    setFilterLowStock(checked)
+    if (checked) {
+      setFilterInStock(false)
+      setFilterOutOfStock(false)
+    }
+  }, [])
+
+  const handleFilterOutOfStockChange = useCallback((checked: boolean) => {
+    setFilterOutOfStock(checked)
+    if (checked) {
+      setFilterInStock(false)
+      setFilterLowStock(false)
+    }
   }, [])
 
   const filteredItems = itemsState
@@ -70,34 +119,28 @@ export default function ViewItems() {
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.description?.toLowerCase().includes(search.toLowerCase())
     )
-    .filter(item => !filterLowStock || item.quantity < 10)
     .filter(item => {
-      if (filterStatus === 'all') return true
-      if (filterStatus === 'in_stock') return item.quantity >= 10
-      if (filterStatus === 'low_stock') return item.quantity > 0 && item.quantity < 10
-      if (filterStatus === 'out_of_stock') return item.quantity === 0
+      // If no filters are selected, show all items
+      if (!filterInStock && !filterLowStock && !filterOutOfStock) return true
+      
+      // Check each filter (only one can be active at a time)
+      const isInStock = item.quantity >= 10
+      const isLowStock = item.quantity > 0 && item.quantity < 10
+      const isOutOfStock = item.quantity === 0
+      
+      if (filterInStock) return isInStock
+      if (filterLowStock) return isLowStock
+      if (filterOutOfStock) return isOutOfStock
+      
       return true
     })
-    .filter(item => {
-      if (!dateFrom && !dateTo) return true
-      const insertedDate = new Date(item.inserted_at)
-      const fromDate = dateFrom ? new Date(dateFrom) : new Date(0)
-      const toDate = dateTo ? new Date(dateTo) : new Date()
-      return insertedDate >= fromDate && insertedDate <= toDate
-    })
 
-  const getFilterLabel = useCallback((status: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock') => {
-    switch (status) {
-      case 'all':
-        return 'your search or filters'
-      case 'in_stock':
-        return 'items that are In Stock'
-      case 'low_stock':
-        return 'items that are Low Stock'
-      case 'out_of_stock':
-        return 'items that are Out of Stock'
-    }
-  }, [])
+  const getFilterLabel = useCallback(() => {
+    if (filterInStock) return 'items that are In Stock'
+    if (filterLowStock) return 'items that are Low Stock'
+    if (filterOutOfStock) return 'items that are Out of Stock'
+    return 'your search'
+  }, [filterInStock, filterLowStock, filterOutOfStock])
 
   const handleAdd = useCallback(() => {
     if (!isAdmin) return showNotification('error', 'Only admins can add items.')
@@ -164,7 +207,9 @@ export default function ViewItems() {
         const newItems = exists
           ? prev.map(i => (i.id === updatedItem.id ? updatedItem : i))
           : [updatedItem, ...prev]
-        return newItems
+        return newItems.sort((a, b) =>
+          new Date(b.inserted_at).getTime() - new Date(a.inserted_at).getTime()
+        )
       })
       const message = updatedItem.id ? 'Item updated successfully.' : 'Item added successfully.'
       showNotification('success', message)
@@ -181,14 +226,15 @@ export default function ViewItems() {
   const handleLogoutConfirm = useCallback(async () => {
     setShowLogoutModal(false)
     setIsLoggingOut(true)
-    // Immediately redirect without waiting for signOut
-    // The signOut will complete in the background
-    signOut().catch(error => console.error('Logout error:', error))
-    // Use a small timeout to ensure state is set before redirect
-    setTimeout(() => {
-      window.location.replace('/')
-    }, 100)
-  }, [signOut])
+    try {
+      await signOut()
+      router.replace('/')
+    } catch (error) {
+      console.error('Failed to log out', error)
+      setIsLoggingOut(false)
+      showNotification('error', 'Failed to log out. Please try again.')
+    }
+  }, [router, signOut, showNotification])
 
   const handleLogoutClose = useCallback(() => {
     setShowLogoutModal(false)
@@ -220,18 +266,26 @@ export default function ViewItems() {
     showNotification('success', 'Inventory exported to CSV.')
   }, [filteredItems, showNotification])
 
-  if (loading || isLoggingOut) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-900 to-indigo-900">
-        <div className="p-8 flex items-center justify-center">Loading...</div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (!authLoading && !user) {
+     router.replace('/')
+    }
+  }, [authLoading, user, router])
 
-  if (!user) {
-    // Redirect to homepage if not authenticated
-    if (typeof window !== 'undefined') {
-      window.location.replace('/')
+  if (!user && !authLoading) {
+    if (isLoggingOut) {
+      return (
+        <div className="min-h-screen relative overflow-hidden" style={{
+          background: `
+            radial-gradient(circle at center, rgba(147, 51, 234, 0.2) 0%, 
+                            rgba(139, 92, 246, 0.1) 50%, 
+                            transparent 100%),
+            linear-gradient(to bottom, #4c1d95 0%, #581c87 100%)
+          `
+        }}>
+          <LoadingModal isVisible={true} text="Logging out..." />
+        </div>
+      )
     }
     return null
   }
@@ -256,8 +310,11 @@ export default function ViewItems() {
     setTempValue
   }
 
+  
   return (
-    <div className="min-h-screen relative overflow-hidden" style={backgroundStyle}>
+  <div className="min-h-screen relative overflow-hidden" style={backgroundStyle}>
+    <LoadingModal isVisible={itemsLoading} text="Loading..." />
+  
       <motion.div 
         className="absolute inset-0"
         initial={{ opacity: 0 }}
@@ -272,7 +329,7 @@ export default function ViewItems() {
 
       <Header 
         profile={profile} 
-        userEmail={user.email || ''} 
+        userEmail={user?.email || ''} 
         onLogout={handleLogout} 
         onAddItem={handleAdd} 
         isAdmin={isAdmin} 
@@ -293,21 +350,19 @@ export default function ViewItems() {
         />
 
         <FiltersPanel
-          filterStatus={filterStatus}
-          onFilterStatusChange={setFilterStatus}
-          dateFrom={dateFrom}
-          onDateFromChange={setDateFrom}
-          dateTo={dateTo}
-          onDateToChange={setDateTo}
+          filterInStock={filterInStock}
+          onFilterInStockChange={handleFilterInStockChange}
           filterLowStock={filterLowStock}
-          onFilterLowStockChange={setFilterLowStock}
+          onFilterLowStockChange={handleFilterLowStockChange}
+          filterOutOfStock={filterOutOfStock}
+          onFilterOutOfStockChange={handleFilterOutOfStockChange}
           show={showFilters}
         />
 
         {filteredItems.length === 0 ? (
           <EmptyState 
             hasItems={itemsState.length > 0} 
-            filterLabel={getFilterLabel(filterStatus)} 
+            filterLabel={getFilterLabel()} 
             isAdmin={isAdmin} 
           />
         ) : viewMode === 'grid' ? (

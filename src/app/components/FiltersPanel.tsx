@@ -1,26 +1,22 @@
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface FiltersPanelProps {
-  filterStatus: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock'
-  onFilterStatusChange: (status: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock') => void
-  dateFrom: string
-  onDateFromChange: (date: string) => void
-  dateTo: string
-  onDateToChange: (date: string) => void
+  filterInStock: boolean
+  onFilterInStockChange: (checked: boolean) => void
   filterLowStock: boolean
   onFilterLowStockChange: (checked: boolean) => void
+  filterOutOfStock: boolean
+  onFilterOutOfStockChange: (checked: boolean) => void
   show: boolean
 }
 
 export default function FiltersPanel({
-  filterStatus,
-  onFilterStatusChange,
-  dateFrom,
-  onDateFromChange,
-  dateTo,
-  onDateToChange,
+  filterInStock,
+  onFilterInStockChange,
   filterLowStock,
   onFilterLowStockChange,
+  filterOutOfStock,
+  onFilterOutOfStockChange,
   show
 }: FiltersPanelProps) {
   return (
@@ -30,51 +26,38 @@ export default function FiltersPanel({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="bg-white/90 backdrop-blur-sm rounded-xl p-4 mb-6 space-y-4 overflow-hidden"
+          className="bg-white/90 backdrop-blur-sm rounded-xl p-4 mb-6 overflow-hidden"
         >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={filterStatus}
-                onChange={(e) => onFilterStatusChange(e.target.value as 'all' | 'in_stock' | 'low_stock' | 'out_of_stock')}
-                className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="all">All</option>
-                <option value="in_stock">In Stock</option>
-                <option value="low_stock">Low Stock</option>
-                <option value="out_of_stock">Out of Stock</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">From Date</label>
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
               <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => onDateFromChange(e.target.value)}
-                className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                type="checkbox"
+                checked={filterInStock}
+                onChange={(e) => onFilterInStockChange(e.target.checked)}
+                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+              <span className="font-medium">In Stock</span>
+            </label>
+            
+            <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
               <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => onDateToChange(e.target.value)}
-                className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                type="checkbox"
+                checked={filterLowStock}
+                onChange={(e) => onFilterLowStockChange(e.target.checked)}
+                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
               />
-            </div>
-            <div className="flex items-end">
-              <label className="flex items-center space-x-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={filterLowStock}
-                  onChange={(e) => onFilterLowStockChange(e.target.checked)}
-                  className="rounded"
-                />
-                <span>Low Stock Only</span>
-              </label>
-            </div>
+              <span className="font-medium">Low Stock</span>
+            </label>
+            
+            <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filterOutOfStock}
+                onChange={(e) => onFilterOutOfStockChange(e.target.checked)}
+                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+              />
+              <span className="font-medium">Out of Stock</span>
+            </label>
           </div>
         </motion.div>
       )}
