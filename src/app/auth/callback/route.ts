@@ -8,7 +8,27 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (error) {
+      console.error('Auth error:', error)
+      return NextResponse.redirect(`${origin}?error=auth_failed`)
+    }
+    
+    if (data.session) {
+      const response = NextResponse.redirect(`${origin}/view`)
+      response.cookies.set('sb-access-token', data.session.access_token, {
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+      })
+      response.cookies.set('sb-refresh-token', data.session.refresh_token, {
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+      })
+      return response
+    }
   }
 
   return NextResponse.redirect(`${origin}/view`)
