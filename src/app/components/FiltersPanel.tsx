@@ -1,3 +1,4 @@
+'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface FiltersPanelProps {
@@ -23,9 +24,17 @@ export default function FiltersPanel({
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
+          layout  
+          initial={{ opacity: 0, maxHeight: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, maxHeight: '200px', scale: 1 }}
+          exit={{ opacity: 0, maxHeight: 0, scale: 0.95 }}
+          transition={{ 
+            type: "spring",  
+            stiffness: 300,  
+            damping: 30,    
+            mass: 0.5,      
+            duration: 0.4   
+          }}
           className="bg-white/90 backdrop-blur-sm rounded-xl p-4 mb-6 overflow-hidden"
         >
           <div className="flex flex-wrap gap-6">
