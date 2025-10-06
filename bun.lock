@@ -17,7 +17,7 @@
         "papaparse": "^5.5.3",
         "react": "19.1.0",
         "react-dom": "19.1.0",
-        "set-cookie-parser": "^2.7.1",
+        "set-cookie-parser": "^2.7.1"
       },
       "devDependencies": {
         "@eslint/eslintrc": "^3",
@@ -32,10 +32,10 @@
         "eslint": "^9",
         "eslint-config-next": "15.5.4",
         "postcss": "^8.5.6",
-        "tailwindcss": "^3.4.0",
-        "typescript": "^5",
-      },
-    },
+        "tailwindcss": "^3.4.13",
+        "typescript": "^5"
+      }
+    }
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
@@ -1068,6 +1068,6 @@
 
     "wrap-ansi-cjs/string-width/emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 
-    "wrap-ansi-cjs/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="],
+    "wrap-ansi-cjs/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "", {}, "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="]
   }
 }
