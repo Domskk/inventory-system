@@ -283,11 +283,11 @@ export default function Home() {
   }, [authLoading, user, router])
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()  // Prevent default form submission
+    e.preventDefault()
     clearError()
     if (!email || !password) return
 
-    setIsLoading(true)  // Show loading modal
+    setIsLoading(true)
     const { error: authError } = isSignUp
       ? await supabase.auth.signUp({ email, password })
       : await supabase.auth.signInWithPassword({ email, password })
@@ -295,23 +295,28 @@ export default function Home() {
     setIsLoading(false)
 
     if (authError) {
-      setError(authError.message)  // Show error modal
+      setError(authError.message)
     } else {
       if (isSignUp) {
         setError('Account created! Check your email to confirm your account.')
-        // Optionally, show success modal instead, but keeping as error for now (or make separate success)
       }
     }
   }, [isSignUp, email, password, supabase, clearError])
 
   const handleLogin = useCallback(async () => {
     clearError()
-    setIsLoading(true)  // Show modal briefly for OAuth
-    supabase.auth.signInWithOAuth({ provider: 'github' })
-    // Note: OAuth redirects immediately, so modal hides on next render or via timeout if needed
-    setTimeout(() => setIsLoading(false), 1000)  // Fallback hide after 1s
+    setIsLoading(true)
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    if (error) {
+      setIsLoading(false)
+      setError(error.message)
+    }
   }, [supabase, clearError])
-
   const handleForgotPassword = useCallback(async () => {
     clearError()
     if (!email) {

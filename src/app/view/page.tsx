@@ -58,7 +58,7 @@ export default function ViewItems() {
     )
     setItems(sortedItems)
   }, [items])
-
+  
   const {
     startInlineEdit,
     handleInlineUpdate,
