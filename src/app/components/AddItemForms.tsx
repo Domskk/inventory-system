@@ -23,8 +23,8 @@ export default function AddItemForm({
 }: AddItemFormProps) {
   const [name, setName] = useState(item?.name ?? '')
   const [description, setDescription] = useState(item?.description ?? '')
-  const [quantity, setQuantity] = useState(item?.quantity ?? 0)
-  const [price, setPrice] = useState(item?.price ?? 0)
+  const [quantity, setQuantity] = useState(item?.quantity?.toString() ?? '')
+  const [price, setPrice] = useState(item?.price?.toString() ?? '')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -79,7 +79,9 @@ export default function AddItemForm({
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || quantity < 0 || price < 0) {
+    const numQuantity = quantity ? Number(quantity) : 0
+    const numPrice = price ? Number(price) : 0
+    if (!name || numQuantity < 0 || numPrice < 0) {
       setError('Please fill in a name and valid quantity/price.')
       return
     }
@@ -96,8 +98,8 @@ export default function AddItemForm({
       const updateData: ItemUpdate = {
         name,
         description: description || null,
-        quantity,
-        price,
+        quantity:  numQuantity,
+        price : numPrice,
         image_url: imageUrl,
       }
 
@@ -145,6 +147,10 @@ export default function AddItemForm({
     return isEdit ? 'Update Item' : 'Add Item'
   }, [submitting, isEdit])
 
+    const handleWheel = useCallback((e: React.WheelEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, []);
   return (
     <AnimatePresence>
       <motion.div
@@ -205,9 +211,10 @@ export default function AddItemForm({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quantity *</label>
                 <input
-                  type="number"
+                  type="text"
                   value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  onWheel={handleWheel}
                   min={0}
                   required
                   disabled={submitting}
@@ -219,9 +226,10 @@ export default function AddItemForm({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Price (₱) *</label>
                 <input
-                  type="number"
+                  type="text"
                   value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
+                  onChange={(e) => setPrice(e.target.value)}
+                  onWheel={handleWheel}
                   min={0}
                   step="0.01"
                   required

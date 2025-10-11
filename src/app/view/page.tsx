@@ -28,7 +28,7 @@ function LoadingModal({ isVisible, noBackdrop = false, text = 'Loading...' }: { 
         <>
           {!noBackdrop && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" /> }
           <motion.div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center "
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -243,6 +243,7 @@ export default function ViewItems() {
   const handleLogout = useCallback(() => {
     handleLogoutOpen()
   }, [handleLogoutOpen])
+  
 
   const exportToCSV = useCallback(() => {
     const headers = ['Name', 'Description', 'Quantity', 'Price', 'Total Value', 'Status', 'Date Added']
@@ -309,6 +310,7 @@ export default function ViewItems() {
     handleImageChange,
     setTempValue
   }
+
 
   
   return (
