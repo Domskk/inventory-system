@@ -21,28 +21,20 @@ import DeleteItemModal from '../components/DeleteItemModal'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
 
-function LoadingModal({ isVisible, noBackdrop = false, text = 'Loading...' }: { isVisible: boolean; noBackdrop?: boolean; text?: string; }) {
+// Simple Loading Modal 
+function LoadingModal({ isVisible, text = 'Loading...' }: { isVisible: boolean; text?: string }) {
+  if (!isVisible) return null
+
   return (
-    <>
-      {isVisible && (
-        <>
-          {!noBackdrop && <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" /> }
-          <motion.div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center "
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-          >
-            <div className="flex flex-col items-center space-y-3">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              <p className="text-white text-lg">{text}</p>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-slate-800 text-white px-6 py-4 rounded-lg shadow-lg flex flex-col items-center space-y-3">
+        <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <p className="text-base">{text}</p>
+      </div>
+    </div>
   )
 }
+
 
 export default function ViewItems() {
   const { user, profile, isAdmin, loading: authLoading, signOut } = useAuth()
