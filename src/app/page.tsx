@@ -1,58 +1,69 @@
 'use client'
 import { createClient } from './lib/supabase'
-import { CubeIcon, UserIcon, EyeIcon, EyeSlashIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { CubeIcon, UserIcon, EyeIcon, EyeSlashIcon, XMarkIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import { motion, type Variants, AnimatePresence, easeOut } from 'framer-motion'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from './hooks/useAuth' 
+import { useAuth } from './hooks/useAuth'
 
 const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.1
-    }
-  }
+   hidden: {  opacity: 0 }, 
+    visible: { 
+      opacity: 1, 
+      transition: { 
+        staggerChildren: 0.2, 
+        delayChildren: 0.1
+      } 
+  } 
 }
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+const itemVariants: Variants = { 
+  hidden: { opacity: 0, y: 20 }, 
   visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, ease: easeOut }
+    opacity: 1, y: 0, 
+    transition: { 
+      duration: 0.6, ease: easeOut 
+    }   
   }
 }
 
-const iconVariants: Variants = {
-  hidden: { scale: 0, rotate: -180 },
+const iconVariants: Variants = { 
+  hidden: { scale: 0, rotate: -180 }, 
   visible: { 
-    scale: 1, 
-    rotate: 0
+    scale: 1, rotate: 0 
   }
 }
-
-const formVariants: Variants = {
+const formVariants: Variants = { 
   hidden: { opacity: 0, x: 20 },
-  visible: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -20 }
-}
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.8 },
+   visible: { 
+    opacity: 1, x: 0 }, 
+    exit: { 
+      opacity: 0, x: -20 
+    } 
+  }
+const modalVariants = { 
+  hidden: { opacity: 0, scale: 0.8 }, 
   visible: { 
     opacity: 1, 
-    scale: 1,
-    transition: { duration: 0.2, ease: easeOut }
+    scale: 1, 
+    transition: { 
+      duration: 0.2, 
+      ease: easeOut 
+    } 
   },
-  exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2, ease: easeOut } }
+   exit: 
+   { opacity: 0, 
+    scale: 0.8, 
+    transition: 
+    { duration: 0.2,
+       ease: easeOut 
+    } 
+  }
 }
-
-const backdropVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.2 } }
+const backdropVariants = { 
+  hidden: { opacity: 0 }, 
+  visible: { opacity: 1, 
+    transition: { duration: 0.2 }
+   } 
 }
 
 function AuthForm({ 
@@ -66,7 +77,7 @@ function AuthForm({
   onSubmit, 
   onToggleMode, 
   onForgotPassword,
-  onGitHubLogin
+  onGitHubLogin,
 }: {
   isSignUp: boolean
   email: string
@@ -75,23 +86,25 @@ function AuthForm({
   onEmailChange: (value: string) => void
   onPasswordChange: (value: string) => void
   onTogglePassword: () => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void  // More specific type
+  onSubmit: (e: React.FormEvent<HTMLFormElement>, rememberMe: boolean) => void
   onToggleMode: () => void
   onForgotPassword?: () => void
   onGitHubLogin?: () => void
 }) {
-  const currentKey = isSignUp ? 'signup' : 'login'
+  const [rememberMe, setRememberMe] = useState(false)
 
   return (
     <AnimatePresence mode="wait">
-      <motion.form  // Changed to motion.form for proper typing and as support
-        key={currentKey}
+      <motion.form
+        key={isSignUp ? 'signup' : 'login'}
         variants={formVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
         transition={{ duration: 0.3, ease: easeOut }}
-        onSubmit={onSubmit}  // Now properly typed for form
+        onSubmit={(e) => onSubmit(e, rememberMe)}
+        // Ensure form is properly typed
+        role="form"
       >
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-2">{isSignUp ? 'Sign Up' : 'Log In'}</h2>
@@ -102,23 +115,26 @@ function AuthForm({
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
+            onChange={(e) => onEmailChange(e.target.value)} // Ensure event typing
             className="w-full px-3 py-2 rounded border border-white/20 bg-white/10 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400"
-            required  // Adds validation for form submit
+            required
+            aria-label="Email address"
           />
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}
-              onChange={(e) => onPasswordChange(e.target.value)}
+              onChange={(e) => onPasswordChange(e.target.value)} // Ensure event typing
               className="w-full px-3 py-2 rounded border border-white/20 bg-white/10 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 pr-10"
-              required  // Adds validation for form submit
+              required
+              aria-label="Password"
             />
             <button
               type="button"
               onClick={onTogglePassword}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-purple-300 hover:text-white"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
             </button>
@@ -134,11 +150,9 @@ function AuthForm({
               >
                 <a
                   href="#"
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    onForgotPassword?.(); 
-                  }}
+                  onClick={(e) => { e.preventDefault(); onForgotPassword?.(); }}
                   className="block text-right text-sm text-purple-300 hover:text-white underline"
+                  aria-label="Forgot Password"
                 >
                   Forgot Password?
                 </a>
@@ -146,7 +160,10 @@ function AuthForm({
                   <input
                     id="remember"
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                    aria-label="Remember me"
                   />
                   <label htmlFor="remember" className="ml-2 block text-sm text-purple-300">
                     Remember me
@@ -156,18 +173,20 @@ function AuthForm({
             )}
           </AnimatePresence>
           <button
-            type="submit"  // Changed to type="submit" for form behavior
+            type="submit"
             disabled={!email || !password}
             className="w-full bg-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-purple-700 transition-all duration-300 disabled:opacity-50 shadow-lg"
+            aria-label={isSignUp ? 'Sign up' : 'Log in'}
           >
             {isSignUp ? 'Sign Up' : 'Log In'}
           </button>
           <div className="text-center text-sm">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"} {' '}
             <button
-              type="button"  // Explicitly button to avoid submit
+              type="button"
               onClick={onToggleMode}
               className="text-purple-300 font-medium underline hover:text-white"
+              aria-label={isSignUp ? 'Switch to log in' : 'Switch to sign up'}
             >
               {isSignUp ? 'Log In' : 'Sign Up'}
             </button>
@@ -181,9 +200,10 @@ function AuthForm({
             </div>
           </div>
           <button
-            type="button"  // Explicitly button to avoid submit
+            type="button"
             onClick={onGitHubLogin}
             className="w-full bg-gray-900 border border-gray-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg"
+            aria-label="Sign in with GitHub"
           >
             GitHub
           </button>
@@ -192,8 +212,6 @@ function AuthForm({
     </AnimatePresence>
   )
 }
-
-// Simple Loading Modal Component
 function LoadingModal({ isVisible }: { isVisible: boolean }) {
   return (
     <AnimatePresence>
@@ -207,7 +225,7 @@ function LoadingModal({ isVisible }: { isVisible: boolean }) {
             exit="hidden"
           />
           <motion.div
-            className="fixed top-1/2 left-1/1 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 rounded-lg p-6 shadow-2xl z-50 text-center"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -221,14 +239,7 @@ function LoadingModal({ isVisible }: { isVisible: boolean }) {
   )
 }
 
-// Error Modal Component
-function ErrorModal({ 
-  message, 
-  onClose 
-}: { 
-  message: string | null; 
-  onClose: () => void; 
-}) {
+function ErrorModal({ message, onClose }: { message: string | null; onClose: () => void; }) {
   if (!message) return null
 
   return (
@@ -240,10 +251,10 @@ function ErrorModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          onClick={onClose}  // Click backdrop to close
+          onClick={onClose}
         />
         <motion.div
-          className="fixed top-1/2 left-1/1 transform -translate-x-1/2 -translate-y-1/2 bg-red-900/90 border border-red-500 rounded-lg p-6 shadow-2xl z-50 max-w-md w-full mx-4 text-center"
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-900/90 border border-red-500 rounded-lg p-6 shadow-2xl z-50 max-w-md w-full mx-4 text-center"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -263,17 +274,16 @@ function ErrorModal({
 }
 
 export default function Home() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
   const router = useRouter()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)  // For loading modal
-  const [error, setError] = useState<string | null>(null)  // New state for error modal
-  const supabase = createClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const supabase = createClient()  // Use default client; let handleFormSubmit control persistence
 
-  // Clear error when switching modes or changing inputs
   const clearError = useCallback(() => setError(null), [])
 
   useEffect(() => {
@@ -282,26 +292,40 @@ export default function Home() {
     }
   }, [authLoading, user, router])
 
-  const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>, rememberMe: boolean) => {
     e.preventDefault()
     clearError()
-    if (!email || !password) return
+    if (!email || !password) {
+      setError('Please fill in all fields.')
+      return
+    }
 
+    const client = createClient(rememberMe)  // Create new client with rememberMe preference
     setIsLoading(true)
-    const { error: authError } = isSignUp
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
+    let authResult
+    if (isSignUp) {
+      authResult = await client.auth.signUp({ email, password })
+    } else {
+      authResult = await client.auth.signInWithPassword({ email, password })
+    }
     
     setIsLoading(false)
 
-    if (authError) {
-      setError(authError.message)
+    if (authResult.error) {
+      setError(authResult.error.message)
     } else {
       if (isSignUp) {
-        setError('Account created! Check your email to confirm your account.')
+        setError('Account created! Check your email to confirm your account.')  // Info, not error
+      } else {
+        // Success login handled by auth state change in useAuth
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true')
+        } else {
+          localStorage.removeItem('rememberMe')
+        }
       }
     }
-  }, [isSignUp, email, password, supabase, clearError])
+  }, [isSignUp, email, password, clearError])
 
   const handleLogin = useCallback(async () => {
     clearError()
@@ -317,6 +341,7 @@ export default function Home() {
       setError(error.message)
     }
   }, [supabase, clearError])
+
   const handleForgotPassword = useCallback(async () => {
     clearError()
     if (!email) {
@@ -329,11 +354,16 @@ export default function Home() {
     if (forgotError) {
       setError(forgotError.message)
     } else {
-      setError('Password reset email sent. Check your inbox.')
+      setError('Password reset email sent. Check your inbox.')  // Info, not error
     }
   }, [email, supabase, clearError])
 
-  // Show the form immediately, even during initial authLoading—modal only for actions
+  const handleLogout = useCallback(async () => {
+    await signOut()
+    setError(null)
+    router.replace('/')
+  }, [signOut, router])
+
   return (
     <div 
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
@@ -346,8 +376,8 @@ export default function Home() {
         `
       }}
     >
-      <LoadingModal isVisible={isLoading} />  {/* Modal only for action loading */}
-      <ErrorModal message={error} onClose={clearError} />  {/* Error modal */}
+      <LoadingModal isVisible={isLoading} />
+      <ErrorModal message={error} onClose={clearError} />
 
       <motion.div 
         className="absolute inset-0"
@@ -418,11 +448,20 @@ export default function Home() {
               onEmailChange={(value) => { setEmail(value); clearError(); }}
               onPasswordChange={(value) => { setPassword(value); clearError(); }}
               onTogglePassword={() => setShowPassword(!showPassword)}
-              onSubmit={handleFormSubmit}  // Now handles Enter
+              onSubmit={handleFormSubmit}
               onToggleMode={() => { setIsSignUp(!isSignUp); clearError(); }}
               onForgotPassword={handleForgotPassword}
               onGitHubLogin={handleLogin}
             />
+            {user && (
+           <button
+                onClick={handleLogout}
+                className="w-full bg-red-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-red-700 transition-all duration-300 shadow-lg flex items-center justify-center space-x-2"
+              >
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <span>Log Out</span>
+              </button>
+            )}
           </div>
         </motion.div>
       </motion.div>

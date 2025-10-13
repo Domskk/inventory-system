@@ -7,10 +7,15 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 let supabaseClient: SupabaseClient<Database> | null = null
 
-
-export const createClient = (): SupabaseClient<Database> => {
+export const createClient = (rememberMe: boolean = true): SupabaseClient<Database> => {
   if (!supabaseClient) {
-    supabaseClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey)
+    supabaseClient = createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: rememberMe,
+        detectSessionInUrl: true,
+      },
+    })
   }
   return supabaseClient
 }

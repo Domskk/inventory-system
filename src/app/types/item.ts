@@ -5,7 +5,7 @@ export interface Item {
   quantity: number
   price? : number
   image_url?: string
-  inserted_at: string // updated timestamp on eah update
+  inserted_at: string // updated timestamp on each update
 }
 
 export interface Stats {

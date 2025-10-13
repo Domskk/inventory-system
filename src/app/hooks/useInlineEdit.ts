@@ -73,7 +73,7 @@ export function useInlineEdit(items: Item[], onItemsUpdate: (items: Item[]) => v
         }
       }
 
-      // Upload new
+      // Upload new image
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
       const filePath = `images/${fileName}`
