@@ -1,12 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '../lib/supabase'
 
-export default function ResetPassword() {
-  const searchParams = useSearchParams()
+function ResetPasswordContent() {
   const router = useRouter()
-  const token = searchParams.get('token')
+  const searchParams = useSearchParams() // Use Next.js hook for query params
+  const token = searchParams?.get('token') // Safely access token
   const [newPassword, setNewPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -72,5 +72,13 @@ export default function ResetPassword() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading reset page...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   )
 }

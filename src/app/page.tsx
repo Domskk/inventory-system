@@ -347,7 +347,7 @@ export default function Home() {
     }
     setIsLoading(true)
     const { error: forgotError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
+      redirectTo: `${window.location.origin}/resetpassword`
     })
     setIsLoading(false)
     if (forgotError) {
