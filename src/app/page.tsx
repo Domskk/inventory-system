@@ -7,75 +7,72 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from './hooks/useAuth'
 
 const containerVariants: Variants = {
-   hidden: {  opacity: 0 }, 
-    visible: { 
-      opacity: 1, 
-      transition: { 
-        staggerChildren: 0.2, 
-        delayChildren: 0.1
-      } 
-  } 
-}
-const itemVariants: Variants = { 
-  hidden: { opacity: 0, y: 20 }, 
-  visible: { 
-    opacity: 1, y: 0, 
-    transition: { 
-      duration: 0.6, ease: easeOut 
-    }   
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.1
+    }
   }
 }
-
-const iconVariants: Variants = { 
-  hidden: { scale: 0, rotate: -180 }, 
-  visible: { 
-    scale: 1, rotate: 0 
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: easeOut
+    }
   }
 }
-const formVariants: Variants = { 
+const iconVariants: Variants = {
+  hidden: { scale: 0, rotate: -180 },
+  visible: {
+    scale: 1,
+    rotate: 0
+  }
+}
+const formVariants: Variants = {
   hidden: { opacity: 0, x: 20 },
-   visible: { 
-    opacity: 1, x: 0 }, 
-    exit: { 
-      opacity: 0, x: -20 
-    } 
-  }
-const modalVariants = { 
-  hidden: { opacity: 0, scale: 0.8 }, 
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    transition: { 
-      duration: 0.2, 
-      ease: easeOut 
-    } 
+  visible: {
+    opacity: 1,
+    x: 0
   },
-   exit: 
-   { opacity: 0, 
-    scale: 0.8, 
-    transition: 
-    { duration: 0.2,
-       ease: easeOut 
-    } 
+  exit: {
+    opacity: 0,
+    x: -20
   }
 }
-const backdropVariants = { 
-  hidden: { opacity: 0 }, 
-  visible: { opacity: 1, 
-    transition: { duration: 0.2 }
-   } 
+const modalVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.2, ease: easeOut }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    transition: { duration: 0.2, ease: easeOut }
+  }
+}
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } }
 }
 
-function AuthForm({ 
-  isSignUp, 
-  email, 
-  password, 
-  showPassword, 
-  onEmailChange, 
-  onPasswordChange, 
-  onTogglePassword, 
-  onSubmit, 
-  onToggleMode, 
+function AuthForm({
+  isSignUp,
+  email,
+  password,
+  showPassword,
+  onEmailChange,
+  onPasswordChange,
+  onTogglePassword,
+  onSubmit,
+  onToggleMode,
   onForgotPassword,
   onGitHubLogin,
 }: {
@@ -103,7 +100,6 @@ function AuthForm({
         exit="exit"
         transition={{ duration: 0.3, ease: easeOut }}
         onSubmit={(e) => onSubmit(e, rememberMe)}
-        // Ensure form is properly typed
         role="form"
       >
         <div className="text-center">
@@ -115,7 +111,7 @@ function AuthForm({
             type="email"
             placeholder="Email"
             value={email}
-            onChange={(e) => onEmailChange(e.target.value)} // Ensure event typing
+            onChange={(e) => onEmailChange(e.target.value)}
             className="w-full px-3 py-2 rounded border border-white/20 bg-white/10 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400"
             required
             aria-label="Email address"
@@ -125,7 +121,7 @@ function AuthForm({
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}
-              onChange={(e) => onPasswordChange(e.target.value)} // Ensure event typing
+              onChange={(e) => onPasswordChange(e.target.value)}
               className="w-full px-3 py-2 rounded border border-white/20 bg-white/10 text-white placeholder-purple-300 focus:outline-none focus:border-purple-400 pr-10"
               required
               aria-label="Password"
@@ -212,6 +208,7 @@ function AuthForm({
     </AnimatePresence>
   )
 }
+
 function LoadingModal({ isVisible }: { isVisible: boolean }) {
   return (
     <AnimatePresence>
@@ -254,7 +251,7 @@ function ErrorModal({ message, onClose }: { message: string | null; onClose: () 
           onClick={onClose}
         />
         <motion.div
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-900/90 border border-red-500 rounded-lg p-6 shadow-2xl z-50 max-w-md w-full mx-4 text-center"
+          className="fixed top-1/2 left-1/1 transform -translate-x-1/2 -translate-y-1/2 bg-red-900/90 border border-red-500 rounded-lg p-6 shadow-2xl z-50 max-w-md w-full mx-4 text-center"
           variants={modalVariants}
           initial="hidden"
           animate="visible"
@@ -282,15 +279,16 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()  // Use default client; let handleFormSubmit control persistence
+  const supabase = createClient()
 
   const clearError = useCallback(() => setError(null), [])
 
+  // Only redirect after successful login, not during password reset
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !error?.includes('Password reset')) {
       router.replace('/view')
     }
-  }, [authLoading, user, router])
+  }, [authLoading, user, router, error])
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>, rememberMe: boolean) => {
     e.preventDefault()
@@ -300,7 +298,7 @@ export default function Home() {
       return
     }
 
-    const client = createClient(rememberMe)  // Create new client with rememberMe preference
+    const client = createClient(rememberMe)
     setIsLoading(true)
     let authResult
     if (isSignUp) {
@@ -315,9 +313,8 @@ export default function Home() {
       setError(authResult.error.message)
     } else {
       if (isSignUp) {
-        setError('Account created! Check your email to confirm your account.')  // Info, not error
+        setError('Account created! Check your email to confirm your account.')
       } else {
-        // Success login handled by auth state change in useAuth
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true')
         } else {
@@ -330,7 +327,7 @@ export default function Home() {
   const handleLogin = useCallback(async () => {
     clearError()
     setIsLoading(true)
-    const { error } = await supabase.auth.signInWithOAuth({ 
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`
@@ -348,13 +345,15 @@ export default function Home() {
       setError('Please enter your email address.')
       return
     }
+    setIsLoading(true)
     const { error: forgotError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin
+      redirectTo: `${window.location.origin}/reset-password`
     })
+    setIsLoading(false)
     if (forgotError) {
       setError(forgotError.message)
     } else {
-      setError('Password reset email sent. Check your inbox.')  // Info, not error
+      setError('Password reset email sent. Check your inbox and follow the link to set a new password.')
     }
   }, [email, supabase, clearError])
 
@@ -365,12 +364,12 @@ export default function Home() {
   }, [signOut, router])
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{
         background: `
-          radial-gradient(circle at center, rgba(147, 51, 234, 0.2) 0%, 
-                          rgba(139, 92, 246, 0.1) 50%, 
+          radial-gradient(circle at center, rgba(147, 51, 234, 0.2) 0%,
+                          rgba(139, 92, 246, 0.1) 50%,
                           transparent 100%),
           linear-gradient(to bottom, #4c1d95 0%, #581c87 100%)
         `
@@ -379,62 +378,62 @@ export default function Home() {
       <LoadingModal isVisible={isLoading} />
       <ErrorModal message={error} onClose={clearError} />
 
-      <motion.div 
+      <motion.div
         className="absolute inset-0"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <motion.div 
+        <motion.div
           className="absolute top-20 left-10 w-4 h-4 bg-purple-300 rounded-full"
           animate={{ y: [0, -30, 0], opacity: [0.8, 1, 0.8] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div 
+        <motion.div
           className="absolute top-40 right-20 w-3 h-3 bg-purple-200 rounded-full"
           animate={{ y: [0, 20, 0], opacity: [0.6, 1, 0.6] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-40 left-1/3 w-5 h-5 bg-purple-400 rounded-full"
           animate={{ y: [0, -15, 0], opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-20 right-1/4 w-2 h-2 bg-purple-500 rounded-full"
           animate={{ y: [0, 10, 0], opacity: [0.5, 0.9, 0.5] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
         />
       </motion.div>
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 text-center w-full max-w-md px-4"
       >
-        <motion.div 
+        <motion.div
           variants={iconVariants}
           transition={{ duration: 0.8, ease: easeOut }}
         >
           <CubeIcon className="w-16 h-16 text-purple-200 mx-auto mb-4 drop-shadow-lg" />
         </motion.div>
-        
-        <motion.h1 
+
+        <motion.h1
           variants={itemVariants}
           className="text-3xl font-bold text-white mb-2"
         >
           Inventrack
         </motion.h1>
-        
-        <motion.p 
+
+        <motion.p
           variants={itemVariants}
           className="text-lg text-purple-100 mb-6"
         >
           Track stock, manage orders, and stay organized effortlessly.
         </motion.p>
-        
-        <motion.div 
+
+        <motion.div
           variants={itemVariants}
           className="space-y-4"
         >
@@ -454,7 +453,7 @@ export default function Home() {
               onGitHubLogin={handleLogin}
             />
             {user && (
-           <button
+              <button
                 onClick={handleLogout}
                 className="w-full bg-red-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-red-700 transition-all duration-300 shadow-lg flex items-center justify-center space-x-2"
               >
